@@ -1,68 +1,53 @@
 <?php
 
-class HorlogesController extends BaseController
-{
+class HorlogesController extends BaseController {
     private $horlogeModel;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->horlogeModel = $this->model('Horloge');
     }
 
-    public function index($display='none', $message='')
-    {
+    public function index($display='none', $message='', $color='success') {
         $result = $this->horlogeModel->getHorloges();
-
         $data = [
             'title' => 'Overzicht Horloges',
             'display' => $display,
             'message' => $message,
+            'color' => $color,
             'result' => $result
         ];
-
         $this->view('Horloges/index', $data);
     }
 
-    public function delete($Id)
-    {
-        $result = $this->horlogeModel->delete($Id);
-
-        header('Refresh:3; url=' . URLROOT . '/HorlogeController/index');
-
-        $this->index('flex', 'record is verwijderd');
-    }
-
-    public function create()
-    {
-        $data = [
-            'title' => 'Nieuwe horloge toevoegen',
-            'display' => 'none',
-            'message' => ''
-        ];
+    public function create() {
+        $data = ['title' => 'Nieuwe horloge toevoegen', 'display' => 'none', 'message' => ''];
 
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
-            if (
-                empty($_POST['merk']) ||
-                empty($_POST['model']) ||
-                empty($_POST['prijs']) ||
-                empty($_POST['materiaal']) ||
-                empty($_POST['gewicht']) ||
-                empty($_POST['releasedatum']) ||
-                empty($_POST['waterdichtheid']) ||
-                empty($_POST['type'])
-            ) {
-                $data['display'] = 'flex';
-                $data['message'] = 'Vul alle velden in';
-            } else {
-                $data['display'] = 'flex';
-                $data['message'] = 'De gegevens zijn opgeslagen';
+            $this->horlogeModel->create($_POST);
+            header('Refresh:2; URL=' . URLROOT . '/HorlogesController/index');
+            $this->index('flex', 'De gegevens zijn opgeslagen');
+            return;
+        }
+        $this->view('Horloges/create', $data);
+    }
 
-                $this->horlogeModel->create($_POST);
+    public function update($id = null) {
+        $data = ['title' => 'Wijzig Horloge', 'display' => 'none', 'message' => '', 'color' => 'success'];
 
-                header('Refresh:3; URL=' . URLROOT . '/HorlogeController/index');
-            }
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $this->horlogeModel->updateHorloge($_POST);
+            header("Refresh:2; url=" . URLROOT . "/HorlogesController/index");
+            $this->index('flex', 'Het record is succesvol bijgewerkt');
+            return;
         }
 
-        $this->view('Horloges/create', $data);
+        $data['horloge'] = $this->horlogeModel->getHorlogeById($id);
+        $this->view('Horloges/update', $data);
+    }
+
+    public function delete($id) {
+        $this->horlogeModel->delete($id);
+        header('Refresh:2; url=' . URLROOT . '/HorlogesController/index');
+        $this->index('flex', 'Record is verwijderd', 'danger');
     }
 }
