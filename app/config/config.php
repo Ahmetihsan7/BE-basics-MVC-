@@ -17,3 +17,5 @@ define('URLROOT', 'http://www.mvc-basics.nl');
  * Het pad naar de folder app
  */
 define('APPROOT', dirname(dirname(__FILE__)));
+
+// Wachtwoord123!

@@ -7,6 +7,7 @@ use App\Http\Controllers\AssistentController;
 use App\Http\Controllers\PraktijkmanagementController;
 use App\Http\Controllers\PatientController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,12 +16,6 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
 Route::get('/tandarts', [TandartsController::class, 'index'])
     ->middleware(['auth', 'role:tandarts'])
@@ -34,15 +29,35 @@ Route::get('/assistent', [AssistentController::class, 'index'])
     ->middleware(['auth', 'role:assistent'])
     ->name('assistent.index');
 
-Route::get('/praktijkmanagement', [PraktijkmanagementController::class, 'index'])
-    ->middleware(['auth', 'role:praktijkmanagement'])
-    ->name('praktijkmanagement.index');
-
 Route::get('/patient', [PatientController::class, 'index'])
     ->middleware(['auth', 'role:patient,praktijkmanagement'])
     ->name('patient.index');
 
-    use Illuminate\Support\Facades\Auth;
+Route::get('/praktijkmanagement', [PraktijkmanagementController::class, 'index'])
+    ->middleware(['auth', 'role:praktijkmanagement'])
+    ->name('praktijkmanagement.index');
+
+Route::get('/praktijkmanagement/userroles', [PraktijkmanagementController::class, 'manageUserroles'])
+    ->middleware(['auth', 'role:praktijkmanagement'])
+    ->name('praktijkmanagement.userroles');
+
+Route::get('/praktijkmanagement/{id}/edit', [PraktijkmanagementController::class, 'edit'])
+    ->middleware(['auth', 'role:praktijkmanagement'])
+    ->name('praktijkmanagement.edit');
+
+Route::put('/praktijkmanagement/{id}', [PraktijkmanagementController::class, 'update'])
+    ->middleware(['auth', 'role:praktijkmanagement'])
+    ->name('praktijkmanagement.update');
+
+Route::delete('/praktijkmanagement/{userId}', [PraktijkmanagementController::class, 'destroy'])
+    ->middleware(['auth', 'role:praktijkmanagement'])
+    ->name('praktijkmanagement.destroy');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
 Route::get('/uitloggen', function () {
     Auth::logout();
